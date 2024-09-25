@@ -1,7 +1,9 @@
 import { Calendar, dayjsLocalizer } from 'react-big-calendar';
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import dayjs from 'dayjs';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, Select, MenuItem, FormControl, InputLabel, IconButton  } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, Select, MenuItem, FormControl, InputLabel, IconButton ,AppBar, Toolbar, Typography  } from '@mui/material';
+import Avatar from '@mui/material/Avatar';
+import { deepOrange, deepPurple } from '@mui/material/colors';
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SendIcon from '@mui/icons-material/Send';
@@ -325,7 +327,17 @@ function App(){
   };
 
   return(
-    <div style={{ display: 'flex', height: "95vh", width: "90vw", padding: '20px' }}>
+    <>
+    <AppBar position="fixed" style={{ top: 0, left: 0, right: 0 }}>
+        <Toolbar>
+          <Typography variant="h6" style={{ flexGrow: 1 }}>
+            My Calender!
+          </Typography>
+          <Avatar sx={{ bgcolor: deepPurple[500]}}>DS</Avatar>
+          <Button color="inherit" style={{ marginLeft: '10px' }}>Cerrar sesión</Button>
+        </Toolbar>
+    </AppBar>
+    <div style={{ display: 'flex', height: "95vh", width: "90vw", padding: '20px', marginTop:'5%' }}>
       <div style={{height: "95vh", width: "70vw"}}>
         <Calendar 
           localizer={localizer}
@@ -505,6 +517,7 @@ function App(){
       </Dialog>
 
     </div>
+    </>
   )
 }
 
