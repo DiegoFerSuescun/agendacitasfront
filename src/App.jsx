@@ -1,9 +1,14 @@
 import { Calendar, dayjsLocalizer } from 'react-big-calendar';
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import dayjs from 'dayjs';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, Select, MenuItem, FormControl, InputLabel, IconButton  } from '@mui/material';
+import { ArrowBack, ArrowForward } from '@mui/icons-material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SendIcon from '@mui/icons-material/Send';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import './App.css';
 
 function App(){
 
@@ -39,6 +44,7 @@ function App(){
       title: "evento 2"
     },
   ]);
+ 
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -49,8 +55,7 @@ function App(){
         const formattedEvents = response.data.map(event => ({
           ...event,
           start: new Date(event.start),
-          end: new Date(event.end),     
-          date: new Date(event.date),
+          end: new Date(event.end),
       }));
         setEventsBack(response.data);
         setEvents(formattedEvents)
@@ -83,7 +88,7 @@ function App(){
   const timeSlots = Array.from({length:21}, (_,i) => 
   dayjs().startOf('day').add(8, 'hour').add(i * 30, 'minute').format('HH:mm'));
   
-  const services = ['Servicio 1', 'Servicio 2', 'Servicio 3']
+  const services = ['Servicio 1', 'Servicio 2', 'Servicio 3'];
   //MANEJADOR PARA LA SELECCION DE UN SLOT
 
   const handleSlot = (slotInfo) => {   
@@ -103,31 +108,13 @@ function App(){
   };
   
   //MANEJADOR DE EL ENVIO DE EVENTO
-  console.log("EVENTSSSSSSSSSS: ", events);
   
   const handlesendEvent = async () => {
     if (!newEvent.title || !startEvent || !endtEvent || !newEvent.name || !newEvent.phone || !newEvent.service || !newEvent.date || !newEvent.notes) {
-      alert("por favor debes ingresar todos los campos");
-      return;
+      alert("Please fill out all fields");
     }
     const eventDate = dayjs(newEvent.date).startOf('day');
-    const updatedEvent = {
-      title: newEvent.title,
-      start: eventDate
-      .set('hour', startEvent.split(':')[0])
-      .set('minute', startEvent.split(':')[1])
-      .toDate(),
-      end: eventDate
-      .set('hour', endtEvent.split(':')[0])
-      .set('minute', endtEvent.split(':')[1])
-      .toDate(),
-      name: newEvent.name,
-      phone: newEvent.phone,
-      service: newEvent.service,
-      date: newEvent.date,
-      notes: newEvent.notes
 
-    };
     const updatedEventID = {
       title: newEvent.title,
       start: eventDate
@@ -145,23 +132,64 @@ function App(){
       notes: newEvent.notes,
       id: newEvent.id
     };
-
+    
     try {
       if (edit) {
-        await axios.put(`http://localhost:3005/api/events/${newEvent.id}`, updatedEvent);
+        const datatosend = {
+          title: newEvent.title,
+        start: dayjs(newEvent.date)
+            .set('hour', startEvent.split(':')[0])
+            .set('minute', startEvent.split(':')[1])
+            .toISOString(),
+        end: dayjs(newEvent.date)
+            .set('hour', endtEvent.split(':')[0])
+            .set('minute', endtEvent.split(':')[1])
+            .toISOString(), 
+        name: newEvent.name,
+        phone: newEvent.phone,
+        service: newEvent.service,
+        date: newEvent.date,
+        notes: newEvent.notes
+        }
+        // await axios.put(`http://localhost:3005/api/events/${newEvent.id}`, datatosend);
+        await axios.put(`https://agendacitasback-production.up.railway.app/api/events/${newEvent.id}`, datatosend);
         setEvents(events.map(event => event.id === newEvent.id ? updatedEventID : event));
       } else {
-        const response = await axios.post(`http://localhost:3005/api/events`, updatedEvent);
-        console.log("ESTE ES RESPONSE ", response);
-        const newE = response.data 
-        setEvents([...events, newE]);        
+        const datatosend = {
+          title: newEvent.title,
+        start: dayjs(newEvent.date)
+            .set('hour', startEvent.split(':')[0])
+            .set('minute', startEvent.split(':')[1])
+            .toISOString(),
+        end: dayjs(newEvent.date)
+            .set('hour', endtEvent.split(':')[0])
+            .set('minute', endtEvent.split(':')[1])
+            .toISOString(), 
+        name: newEvent.name,
+        phone: newEvent.phone,
+        service: newEvent.service,
+        date: newEvent.date,
+        notes: newEvent.notes
+        }
+        // const response = await axios.post(`http://localhost:3005/api/events`, datatosend);
+        const response = await axios.post(`https://agendacitasback-production.up.railway.app/api/events`, datatosend);
+        const dataResponse = response.data;
+        
+        const formattedEvent = {
+          ...dataResponse,
+          start: new Date(dataResponse.start),
+          end: new Date(dataResponse.end),
+      };
+        
+        setEvents([...events, formattedEvent]);        
       }
   
       setModalOpen(false);
       resetForm(); 
     } catch (error) {
       console.log("Ocurrio un error en el try catch de posteo o update ", error);
-      
+      alert('Oppss, please try again!')
+      return;  
     };
   };
 
@@ -180,6 +208,8 @@ function App(){
   const handleOnCancel = () => {
     setModalOpen(false);
     setNewEvent({ title: "", start: "", end: "", date: "", name:"", phone: "", service: "", notes: "" });
+    setStartEvent('');
+    setEndEvent('');
     setEdit(false)
   }
 
@@ -187,11 +217,13 @@ function App(){
   const handleDeleteEvent = async (eventInfo) => {
     const idevent = newEvent?.id;
     try {
-      await axios.delete(`http://localhost:3005/api/events/${idevent}`);
+      // await axios.delete(`http://localhost:3005/api/events/${idevent}`);
+      await axios.delete(`https://agendacitasback-production.up.railway.app/api/events/${idevent}`);
       setEvents(events.filter(event => event.id !== newEvent.id))
       handleOnCancel();
     } catch (error) {
       console.log("UPPPS AH ocurrido un problema al eliminar el vento");
+      alert('Oopss try again!')
     } 
   };
 
@@ -204,21 +236,122 @@ function App(){
     setEdit(false);
   };
 
+  //CUstomToolbar
+  const CustomToolbar = ({ label, onNavigate, view, onView }) => {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <IconButton onClick={() => onNavigate('PREV')}>
+            <ArrowBack />
+          </IconButton>
+          <IconButton onClick={() => onNavigate('NEXT')}>
+            <ArrowForward />
+          </IconButton>
+          <Button onClick={() => onNavigate('TODAY')} variant="contained" size="small">
+            Today!
+          </Button>
+        </div>
+        <h4>{label}</h4>
+        <div style={{ display: "flex", gap: "3%"}}>
+          <Button onClick={() => onView('month')} variant={view === 'month' ? 'contained' : 'outlined'} size="small">
+            Month
+          </Button>
+          <Button onClick={() => onView('week')} variant={view === 'week' ? 'contained' : 'outlined'} size="small">
+            Week
+          </Button>
+          <Button onClick={() => onView('day')} variant={view === 'day' ? 'contained' : 'outlined'} size="small">
+            Day
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  const components = {
+    event: props => {
+      return <div
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        textAlign: "end",
+        gap: "3px",
+        marginTop: "2px",
+        fontSize: "15px"
+      }}>
+        <CalendarMonthIcon fontSize='small'/>
+        {props.event.title}
+      </div>
+    },
+    toolbar: CustomToolbar
+  };
+
+  const dayPropGetter = (date) => {
+    const today = new Date();
+    if (date.toDateString() === today.toDateString()) {
+      return {
+        style: {
+          backgroundColor: 'rgb(196, 202, 205)',
+          color: '#00796b', 
+        }
+      };
+    }
+    return {}; 
+  };
+
+  const PresentationCard = () => {
+    return (
+      <div style={{
+        padding: '20px',
+        border: '1px solid #ccc',
+        borderRadius: '10px',
+        boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+        width: '100%',
+        backgroundColor: '#f5f5f5',
+      }}>
+        <h2>¡Welcome to our Calendar!</h2>
+        <p>
+          Here you can manage your events, reservations and appointments quickly and easily. 
+          Select a date, add details and organize your agenda like never before.
+        </p>
+        <h4>Do you need help??</h4>
+        <p>
+          Contact us if you have any questions or problems. We are here to assist you.
+        </p>
+        <p>
+          Developer: Diego Suescun.
+        </p>
+      </div>
+    );
+  };
 
   return(
-    <div style={{height: "95vh", width: "80vw"}}>
-      <Calendar 
-        localizer={localizer}
-        events={events}
-        views={["month", "week", "day"]}
-        selectable={true} 
-        onSelectSlot={handleSlot} 
-        onSelectEvent={handleEventClick}
-      />
-
+    <div style={{ display: 'flex', height: "95vh", width: "90vw", padding: '20px' }}>
+      <div style={{height: "95vh", width: "70vw"}}>
+        <Calendar 
+          localizer={localizer}
+          events={events}
+          views={["month", "week", "day"]}
+          defaultView='month'
+          selectable={true}
+          formats={{
+            dayHeaderFormat: date => {
+              return dayjs(date).format('dddd-DD/MM')
+            }
+          }}
+          components={components}
+          onSelectSlot={handleSlot} 
+          onSelectEvent={handleEventClick}
+          dayPropGetter={dayPropGetter}
+        />
+      </div>
+      
+      <div style={{ width: "15%", marginLeft: "4%", marginTop: "5%" }}>
+        <PresentationCard />
+      </div>
+      
       {/* Modal para agregar */}
 
-      <Dialog open={modalOpen} onClose={() => handleOnCancel()} sx={{ "& .MuiDialog-paper": { width: '40vh', maxWidth: '400px', height: '70vh', minHeight: "70vh" } }}>
+      <Dialog className='modalMui' open={modalOpen} onClose={() => handleOnCancel()} sx={{ "& .MuiDialog-paper": { width: '40vh', maxWidth: '400px', height: '70vh', minHeight: "70vh" } }}>
         <DialogTitle sx={{ 
             textAlign: 'center',  
             fontWeight: 'bold',   
@@ -233,7 +366,7 @@ function App(){
             <TextField
               autoFocus
               margin='dense'
-              label='Título'
+              label='Title'
               fullWidth
               value={newEvent.title}
               onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
@@ -303,7 +436,7 @@ function App(){
             </FormControl>
 
             <FormControl fullWidth margin="normal">
-              <InputLabel id="start-time-label">Hora Inicio</InputLabel>
+              <InputLabel id="start-time-label">Start Time *</InputLabel>
                 <Select 
                   labelId="start-time-label" // Asigna labelId
                   value={startEvent} 
@@ -316,7 +449,7 @@ function App(){
                       },
                     },
                   }}
-                  label="Hora Inicio" // Esto es para el label flotante
+                  label="Start Time *"
                 >
                   {timeSlots.map((time) => (
                     <MenuItem key={time} value={time}>
@@ -326,7 +459,7 @@ function App(){
                 </Select>
             </FormControl>
             <FormControl fullWidth margin="normal" disabled={!startEvent}>
-              <InputLabel id="end-time-label">Hora de Fin</InputLabel>
+              <InputLabel id="end-time-label">End Time *</InputLabel>
                 <Select 
                   labelId="end-time-label" // Asigna labelId
                   value={endtEvent}
@@ -339,7 +472,7 @@ function App(){
                       },
                     },
                   }}
-                  label="Hora de Fin" // Esto es para el label flotante
+                  label="End Time *" // Esto es para el label flotante
                 >
                   {postTimeslots.map((time) => (
                     <MenuItem key={time} value={time}>
@@ -351,17 +484,23 @@ function App(){
             <TextField
               autoFocus
               margin='dense'
-              label='Notes *'
+              label='Notes'
               value={newEvent.notes}
               onChange={(e) => setNewEvent({...newEvent, notes: e.target.value})}
               required
             />
-            <Button onClick={(e) => handleDeleteEvent(e)}>Deseo cancelar este evento</Button>
+            {
+              edit ? (
+                <Button sx={{marginTop: "10%"}} startIcon={<DeleteIcon />} variant="outlined"  size="small" color="error"  onClick={(e) => handleDeleteEvent(e)}>Deseo cancelar este evento</Button>
+              ):
+              null
+            }
+            
 
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => handleOnCancel()}>Cancelar</Button>
-            <Button onClick={handlesendEvent}>agregar</Button>
+          <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', width: '90%', marginLeft: "2%" }}>
+            <Button variant="outlined"  size="small" color="error" onClick={() => handleOnCancel()}>Salir</Button>
+            <Button variant="contained" size="small"  onClick={handlesendEvent} endIcon={<SendIcon />}>agregar</Button>
           </DialogActions>
       </Dialog>
 
