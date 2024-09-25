@@ -50,7 +50,7 @@ function App(){
     const fetchEvents = async () => {
 
       try {
-        const response = await axios('http://localhost:3005/api/events');
+        const response = await axios('https://agendacitasback-production.up.railway.app/api/events');
         // console.log("ESTE ES MI RESPONSE ", response);
         const formattedEvents = response.data.map(event => ({
           ...event,
