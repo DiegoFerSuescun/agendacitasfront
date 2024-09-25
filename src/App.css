@@ -1,0 +1,10 @@
+
+.modalMui .css-rsks93-MuiPaper-root-MuiDialog-paper{
+    border-radius: 20px !important;
+} 
+
+.rbc-day-slot, 
+.rbc-time-slot,
+.rbc-header {
+  border-color: #00796b !important; 
+}
