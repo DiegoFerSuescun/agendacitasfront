@@ -151,7 +151,8 @@ function App(){
         date: newEvent.date,
         notes: newEvent.notes
         }
-        await axios.put(`http://localhost:3005/api/events/${newEvent.id}`, datatosend);
+        // await axios.put(`http://localhost:3005/api/events/${newEvent.id}`, datatosend);
+        await axios.put(`https://agendacitasback-production.up.railway.app/api/events/${newEvent.id}`, datatosend);
         setEvents(events.map(event => event.id === newEvent.id ? updatedEventID : event));
       } else {
         const datatosend = {
@@ -170,7 +171,8 @@ function App(){
         date: newEvent.date,
         notes: newEvent.notes
         }
-        const response = await axios.post(`http://localhost:3005/api/events`, datatosend);
+        // const response = await axios.post(`http://localhost:3005/api/events`, datatosend);
+        const response = await axios.post(`https://agendacitasback-production.up.railway.app/api/events`, datatosend);
         const dataResponse = response.data;
         
         const formattedEvent = {
@@ -215,7 +217,8 @@ function App(){
   const handleDeleteEvent = async (eventInfo) => {
     const idevent = newEvent?.id;
     try {
-      await axios.delete(`http://localhost:3005/api/events/${idevent}`);
+      // await axios.delete(`http://localhost:3005/api/events/${idevent}`);
+      await axios.delete(`https://agendacitasback-production.up.railway.app/api/events/${idevent}`);
       setEvents(events.filter(event => event.id !== newEvent.id))
       handleOnCancel();
     } catch (error) {
