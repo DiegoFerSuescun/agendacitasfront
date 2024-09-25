@@ -154,7 +154,7 @@ function App(){
         const response = await axios.post(`http://localhost:3005/api/events`, updatedEvent);
         console.log("ESTE ES RESPONSE ", response);
         const newE = response.data 
-        setEvents([...events, newE]);        
+        setEvents([...events, updatedEvent]);        
       }
   
       setModalOpen(false);
