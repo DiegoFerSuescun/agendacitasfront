@@ -34,7 +34,6 @@ function App(){
   const [postTimeslots, setPostTimeslots] = useState([]);
   const [dateOptions, setDateOptions] = useState([]);
   const [ edit, setEdit ] = useState(false);
-  const [ eventsback, setEventsBack ] = useState([])
   const [events, setEvents] = useState([]);
   const [ loading, setloading ] = useState(false)
  
@@ -44,13 +43,11 @@ function App(){
 
       try {
         const response = await axios('https://agendacitasback-production.up.railway.app/api/events');
-        // console.log("ESTE ES MI RESPONSE ", response);
         const formattedEvents = response.data.map(event => ({
           ...event,
           start: new Date(event.start),
           end: new Date(event.end),
       }));
-        setEventsBack(response.data);
         setEvents(formattedEvents)
       } catch (error) {
         console.log("OCURRIO UN ERROR EN EL FETCH DEL BACK ", error);
@@ -83,13 +80,16 @@ function App(){
   
   const services = ['Servicio 1', 'Servicio 2', 'Servicio 3'];
   //MANEJADOR PARA LA SELECCION DE UN SLOT
-
+  console.log("ESTE ES DATEOPTIOSN ", dateOptions);
+  
   const handleSlot = (slotInfo) => {   
     setSlot(slotInfo);
     const selected = slotInfo.start? dayjs(slotInfo.start).format('YYYY-MM-DD'): null;    
     const nextdays = Array.from({length: 7}, (_, i) => 
       dayjs(selected).add(i, 'day').format('YYYY-MM-DD')
     );
+    console.log("ESTE ES SELECTED: ", selected);
+    console.log("ESTE es nextDays: ", nextdays);
     setDateOptions(nextdays)
     setNewEvent({
       ...newEvent,
@@ -189,7 +189,13 @@ function App(){
   //MANEJADOR PARA ACTUALIZAR UN EVENTO
 
   const handleEventClick = (event) => {
-    // console.log("EVENTTTTTTTTTTTTTTTTTTTTTTTT ", event); 
+    const selected = event.start? dayjs(event.start).format('YYYY-MM-DD'): null;    
+    const nextdays = Array.from({length: 7}, (_, i) => 
+      dayjs(selected).add(i, 'day').format('YYYY-MM-DD')
+    );
+    console.log("ESTE ES SELECTED: ", selected);
+    console.log("ESTE es nextDays: ", nextdays);
+    setDateOptions(nextdays)
     setNewEvent({...event, date: dayjs(event.date).format('YYYY-MM-DD')}); // 
     setStartEvent(dayjs(event.start).format('HH:mm'));
     setEndEvent(dayjs(event.end).format('HH:mm'));
@@ -224,17 +230,15 @@ function App(){
 
   const handleAddBooking = () => {
     setloading(true);
-
-    const selected = dayjs().format('YYYY-MM-DD');    
-    const nextdays = Array.from({length: 7}, (_, i) => 
-      dayjs(selected).add(i, 'day').format('YYYY-MM-DD')
-    );
-    setDateOptions(nextdays)
-    setNewEvent({
-      ...newEvent,
-      date: selected
-    })
-
+      const selected = dayjs().format('YYYY-MM-DD');    
+      const nextdays = Array.from({length: 7}, (_, i) => 
+        dayjs(selected).add(i, 'day').format('YYYY-MM-DD')
+      );
+      setDateOptions(nextdays)
+      setNewEvent({
+        ...newEvent,
+        date: selected
+      });
     setloading(false)
     setModalOpen(true);
   }
