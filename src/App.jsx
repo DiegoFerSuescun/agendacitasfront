@@ -8,6 +8,7 @@ import { ArrowBack, ArrowForward } from '@mui/icons-material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SendIcon from '@mui/icons-material/Send';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import AddIcon from '@mui/icons-material/Add';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import './App.css';
@@ -34,18 +35,8 @@ function App(){
   const [dateOptions, setDateOptions] = useState([]);
   const [ edit, setEdit ] = useState(false);
   const [ eventsback, setEventsBack ] = useState([])
-  const [events, setEvents] = useState([
-    {
-      start: dayjs('2024-09-24T14:00:00').toDate(),
-      end: dayjs('2024-09-24T16:00:00').toDate(),
-      title: "evento 1"
-    },
-    {
-      start: dayjs('2024-09-24T15:00:00').toDate(),
-      end: dayjs('2024-09-24T17:30:00').toDate(),
-      title: "evento 2"
-    },
-  ]);
+  const [events, setEvents] = useState([]);
+  const [ loading, setloading ] = useState(false)
  
 
   useEffect(() => {
@@ -229,6 +220,25 @@ function App(){
     } 
   };
 
+  //HANDLE BUTTON ADD BOOKING
+
+  const handleAddBooking = () => {
+    setloading(true);
+
+    const selected = dayjs().format('YYYY-MM-DD');    
+    const nextdays = Array.from({length: 7}, (_, i) => 
+      dayjs(selected).add(i, 'day').format('YYYY-MM-DD')
+    );
+    setDateOptions(nextdays)
+    setNewEvent({
+      ...newEvent,
+      date: selected
+    })
+
+    setloading(false)
+    setModalOpen(true);
+  }
+
   //RESETEAR EL FORMULARIO
 
   const resetForm = () => {
@@ -334,7 +344,7 @@ function App(){
             My Calender!
           </Typography>
           <Avatar sx={{ bgcolor: deepPurple[500]}}>DS</Avatar>
-          <Button color="inherit" style={{ marginLeft: '10px' }}>Cerrar sesión</Button>
+          <Button color="inherit" style={{ marginLeft: '10px' }} >Cerrar sesión</Button>
         </Toolbar>
     </AppBar>
     <div style={{ display: 'flex', height: "95vh", width: "90vw", padding: '20px', marginTop:'5%' }}>
@@ -356,8 +366,8 @@ function App(){
           dayPropGetter={dayPropGetter}
         />
       </div>
-      
-      <div style={{ width: "15%", marginLeft: "4%", marginTop: "5%" }}>
+      <div style={{ width: "15%", marginLeft: "4%", marginTop: "1%" }}>
+        <Button variant="contained" size="medium" style={{marginBottom: "5%"}} startIcon={<AddIcon />} onClick={() => handleAddBooking()}>Add Booking</Button>
         <PresentationCard />
       </div>
       
